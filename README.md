@@ -1,64 +1,41 @@
-# Appcircle Testing Distribution
+## Appcircle Enterprise App Store
 
-Appcircle simplifies the distribution of builds to test teams with an extensive platform for managing and tracking applications, versions, testers, and teams. Appcircle integrates with enterprise authentication mechanisms such as LDAP and SSO, ensuring secure distribution of testing packages. Learn more about Appcircle testing distribution. Learn more about [Appcircle testing distribution](https://appcircle.io/testing-distribution)
+Appcircle Enterprise Mobile App Store is your own mobile app store for providing access to in-house apps with a customizable mobile storefront.
 
-Appcircle's test distribution extension enables developers to create test groups and share builds with them, utilizing enterprise-grade authentication methods. With the Jenkins Extension, this module will be accessible directly from your pipeline.
+- **Customizable Storefront:** Distribute your in-house apps with a fully customizable mobile storefront.
+- **Secure Distribution:** Everything you need for secure, streamlined distribution of your in-house apps.
+- **No MDM Required:** Allows distribution of B2B and B2E applications without the need for an MDM solution and enrollment.
 
-## Exploring Testing Distribution
+Learn more about [Appcircle Enterprise App Store](https://appcircle.io/enterprise-app-store?&utm_source=azure&utm_medium=product&utm_campaign=enterprise_app_store).
 
-Testing distribution is the process of distributing test builds to designated test groups or individuals. This process allows developers to gather quick feedback, identify bugs, and ensure the quality of software applications before releasing them to customers. Appcircle's test distribution module enables developers to create test groups and share builds with them, utilizing enterprise-grade authentication methods.
+## What Sets Apart Appcircle Enterprise Mobile App Store
 
-## Benefits of Using Testing Distribution
-
-1. **Simplified Binary Distribution**.
-   - **Skip Traditional Stores:** Share .xcarchive .IPA, APK, AAB, Zip, files directly, avoiding the need to use App Store TestFlight or Google Play Internal Testing.
-2. **Streamlined Workflow:**
-   - **Automated Processes:** Platforms like Appcircle automate the distribution process, saving time and reducing manual effort.
-   - **Seamless Integration:** Integrates smoothly with existing DevOps pipelines, enabling efficient build and distribution workflows.
+1. **Direct File Sharing:**
+   - **Skip Traditional Stores:** Share .IPA, APK, or AAB files directly, avoiding the need to wait for Apple App Store or Google Play approvals.
+2. **Flexible Sharing Options:**
+   - **Beta and Live Modes:** Share your app in ‘beta’ mode for testing new features or identifying bugs, or in ‘live’ mode for stable versions. This flexibility helps maintain the development lifecycle without interruptions.
 3. **Enhanced Security:**
-   - **Controlled Access:** Set specific permissions for who can access the test builds using enterprise authentication methods such as LDAP & SSO.
-   - **Confidentiality:** Ensures that only authorized testers have access to the builds, protecting sensitive information.
-4. **Efficient Resource Management:**
-   - **Targeted Testing:** Allows the creation of specific test groups, ensuring that the right people are testing the right features.
-   - **Optimized Testing:** Helps in allocating resources effectively, leading to better utilization of testing resources.
-5. **Reduced Time to Market:**
-   - **Eliminates Approval Delays:** By bypassing store approval processes, developers can distribute builds directly to testers, speeding up the testing cycle.
-   - **Continuous Delivery:** Supports continuous delivery practices, enabling faster iterations and quicker releases.
-6. **Faster Feedback Loop:**
-   - **Quick Issue Identification:** Distributing test builds quickly allows developers to gather immediate feedback, identify bugs, and address issues early in the development cycle.
-   - **Improved Quality:** Continuous testing helps ensure the software meets quality standards before release, reducing the likelihood of post-release issues.
-7. **Cost-Effective:**
-   - **Reduced Overheads:** Automating the distribution reduces the need for manual intervention, cutting down operational costs.
-   - **Efficient Bug Fixes:** Early detection and fixing of bugs prevent costly fixes later in the development process.
-8. **Enhanced User Experience:**
-   - **Better Quality Control:** Ensures that end users receive a more stable and polished product.
-   - **Customer Satisfaction:** By delivering higher quality software, customer satisfaction and trust in the product increase.
+   - **Secure Authentication:** Access the Enterprise Mobile App Store with extra secure authentication using Enterprise Authentication Methods.
+   - **Controlled Access:** Ensure that only authorized users can access the app store and its contents.
+4. **Customizable Mobile Storefront:**
+   - **Tailored Experience:** Provide a customizable mobile storefront for your in-house apps, ensuring a tailored experience that aligns with your brand and user needs.
+5. **No MDM Requirement:**
+   - **Simplified Distribution:** Distribute B2B and B2E applications without the need for a Mobile Device Management (MDM) solution or enrollment, reducing complexity and costs.
+6. **Streamlined Workflow:**
+   - **Seamless Integration:** Integrates smoothly with your existing workflow, making it easy to manage and distribute apps within your organization.
+   - **Efficient Management:** Track and manage applications, versions, testers, and teams effectively, ensuring a smooth distribution process.
 
-Overall, using testing distribution in mobile DevOps significantly enhances the efficiency, security, and effectiveness of the software development process, leading to better products and faster delivery times.
+These features make the Appcircle Enterprise Mobile App Store a powerful tool for securely and efficiently distributing in-house applications, offering flexibility, enhanced security, and a streamlined workflow.
 
-## Getting started
+### Enterprise App Store
 
-To share your builds with testers, you can create distribution profiles and assign testing groups to these profiles.
+After uploading your build successfully, you will see your app in the "Enterprise App Store" module like below
 
-### Testing Distribution
+![Enterprise App Store Dashboard](./src/main/resources/assets/ent_app_store.png)
 
-In order to share your builds with testers, you can create distribution profiles and assign testing groups to the distribution profiles.
+### Install Appcircle Enterprise Store Plugin
 
-![Distribution Profile](./src/main/resources/assets/distribution-start.png)
-
-### Generating/Managing the Personal API Tokens
-
-To generate a Personal API Token, follow these steps:
-
-1. Go to the My Organization screen (the second option at the bottom left).
-2. You'll find the Personal API Token section in the top right corner.
-3. Press the "Generate Token" button to generate your first token.
-
-![Token Generation](./src/main/resources/assets/PAT.png)
-
-### Install Appcircle Testing Distribution Plugin
-
-Go to your Jenkins dashboard and follow, Manage Jenkins > Plugins and search for "Appcircle Testing Distribution"
+Go to your Jenkins dashboard and follow, Manage Jenkins > Plugins and search for "Appcircle Enterprise Store"
 
 ![Installation Steps](./src/main/resources/assets/installation_steps.png)
 
@@ -72,6 +49,19 @@ Go to your configuration page of the project add a build step.
 
 After adding the plugin into your build steps make sure you fulfill required inputs.
 Also, do not forget to add the plugin after your build steps. Because you will be asked to provide the build path.
+
+![Build Step](./src/main/resources/assets/configure_pannel.png)
+
+
+### Generating/Managing the Personal API Tokens
+
+To generate a Personal API Token, follow these steps:
+
+1. Go to the My Organization screen (the second option at the bottom left).
+2. You'll find the Personal API Token section in the top right corner.
+3. Press the "Generate Token" button to generate your first token.
+
+![Token Generation](./src/main/resources/assets/PAT.png)
 
 ### Leveraging Environment Variables
 

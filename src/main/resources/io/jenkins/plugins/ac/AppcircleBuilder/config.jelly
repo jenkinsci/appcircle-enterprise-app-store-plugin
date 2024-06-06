@@ -3,13 +3,23 @@
     <f:entry title="${%Access Token}" field="accessToken">
         <f:textbox />
     </f:entry>
-    <f:entry title="${%Profile ID}" field="profileID">
+    <f:entry title="${%Enterprise Profile ID}" field="entProfileId">
         <f:textbox />
     </f:entry>
     <f:entry title="${%App Path}" field="appPath">
         <f:textbox />
     </f:entry>
-    <f:entry title="${%Message}" field="message">
+    <f:entry title="${%Summary}" field="summary">
         <f:textbox />
+    </f:entry>
+    <f:entry title="${%Release Note}" field="releaseNote">
+        <f:textbox />
+    </f:entry>
+    <f:entry title="Choose Publish Type" field="publishType">
+        <select name="publishType">
+            <option value="0">None</option>
+            <option value="1">Beta</option>
+            <option value="2">Live</option>
+        </select>
     </f:entry>
 </j:jelly>

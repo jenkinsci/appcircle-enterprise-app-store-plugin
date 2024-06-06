@@ -13,7 +13,10 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.ArgumentListBuilder;
 import hudson.util.FormValidation;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
@@ -22,34 +25,26 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class AppcircleBuilder extends Builder implements SimpleBuildStep {
 
     private final String accessToken;
-    private final String profileID;
+    private final String entProfileId;
     private final String appPath;
-    private final String message;
+    private final String summary;
+    private final String releaseNote;
+    private final String publishType;
 
     @DataBoundConstructor
-    public AppcircleBuilder(String accessToken, String appPath, String profileID, String message) {
+    public AppcircleBuilder(String accessToken, String appPath, String entProfileId, String releaseNote, String summary, String publishType) {
         this.accessToken = accessToken;
         this.appPath = appPath;
-        this.profileID = profileID;
-        this.message = message;
-    }
-
-    void installNpm(
-            @NonNull Launcher launcher,
-            @NonNull EnvVars env,
-            @NonNull TaskListener listener,
-            @NonNull FilePath workspace)
-            throws IOException, InterruptedException {
-        ArgumentListBuilder args = new ArgumentListBuilder();
-        args.add("npm");
-        args.add("install");
-        args.add("-g");
-        args.add("@appcircle/cli");
-
-        launcher.launch().cmds(args).envs(env).stdout(listener).pwd(workspace).join();
+        this.entProfileId = entProfileId;
+        this.summary = summary;
+        this.releaseNote = releaseNote;
+        this.publishType = publishType;
     }
 
     void loginToAC(
@@ -71,25 +66,99 @@ public class AppcircleBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-    void uploadArtifact(
+    void uploadForProfile(
             @NonNull Launcher launcher,
             @NonNull EnvVars env,
             @NonNull TaskListener listener,
             @NonNull FilePath workspace)
             throws IOException, InterruptedException {
+        // appcircle enterprise-app-store version upload-for-profile --entProfileId ${profileId} --app ${app}
         ArgumentListBuilder args = new ArgumentListBuilder();
-        // Add the command itself
         args.add("appcircle");
-        args.add("testing-distribution");
-        args.add("upload");
-        args.add("--app", getInputValue(this.appPath, "App Path", env));
-        args.add("--distProfileId", getInputValue(this.profileID, "Profile ID", env));
-        args.add("--message", getInputValue(this.message, "Release Message", env));
+        args.add("enterprise-app-store");
+        args.add("version");
+        args.add("upload-for-profile");
+        args.add("--entProfileId");
+        args.add(getInputValue(this.entProfileId, "Enterprise Profile ID", env));
+        args.add("--app");
+        args.add(getInputValue(this.appPath, "Build Path", env));
 
         int exitCode = launcher.launch().cmds(args).envs(env).stdout(listener).pwd(workspace).join();
 
         if (exitCode != 0) {
-            throw new IOException("Failed to upload build to Appcircle. Exit code: " + exitCode);
+            throw new IOException("Failed to upload app to Appcircle Enterprise store. Exit code: " + exitCode);
+        }
+    }
+
+    String getStoreVersionList(@NonNull EnvVars env, @NonNull TaskListener listener) throws IOException, InterruptedException {
+        ArgumentListBuilder args = new ArgumentListBuilder();
+        args.add("appcircle");
+        args.add("enterprise-app-store");
+        args.add("version");
+        args.add("list");
+        args.add("--entProfileId");
+        args.add(getInputValue(this.entProfileId, "Enterprise Profile ID", env));
+        args.add("-o");
+        args.add("json");
+
+        try {
+            // Execute the command
+            ProcessBuilder processBuilder = new ProcessBuilder(args.toList());
+            Process process = processBuilder.start();
+
+            // Read the output
+            StringBuilder output = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line);
+                }
+            }
+
+            listener.getLogger().println("Output of get: " + output.toString());
+
+            // Parse the JSON output
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode list = objectMapper.readTree(output.toString());
+            @Nullable  String appVersionId = list.get(0).get("id").asText();
+            if (appVersionId != null) {
+                return appVersionId;
+            }
+
+            throw new IOException("Failed to fetch app version list");
+        } catch (Exception e) {
+            throw new IOException("Failed to fetch app version list " + e.getMessage());
+        }
+    }
+
+    void uploadToStore(
+            String appVersionId,
+            @NonNull Launcher launcher,
+            @NonNull EnvVars env,
+            @NonNull TaskListener listener,
+            @NonNull FilePath workspace
+    )  throws IOException, InterruptedException {
+        // `appcircle enterprise-app-store version publish --entProfileId ${entProfileId} --entVersionId ${entVersionId} --summary "${summary}" --releaseNotes "${releaseNote}" --publishType ${publishType}`;
+        ArgumentListBuilder args = new ArgumentListBuilder();
+        args.add("appcircle");
+        args.add("enterprise-app-store");
+        args.add("version");
+        args.add("publish");
+        args.add("--entProfileId");
+        args.add(getInputValue(this.entProfileId, "Enterprise Profile ID", env));
+        args.add("--entVersionId");
+        args.add(appVersionId);
+        args.add("--summary");
+        args.add(getInputValue(this.summary, "Summary", env));
+        args.add("--releaseNotes");
+        args.add(getInputValue(this.releaseNote, "Release Note", env));
+        args.add("--publishType");
+        args.add(getInputValue(this.publishType, "Publish Type", env));
+
+        int exitCode = launcher.launch().cmds(args).envs(env).stdout(listener).pwd(workspace).join();
+
+        if (exitCode != 0) {
+            throw new IOException("Failed to upload app to Appcircle Enterprise store. Exit code: " + exitCode);
         }
     }
 
@@ -102,15 +171,18 @@ public class AppcircleBuilder extends Builder implements SimpleBuildStep {
             @NonNull TaskListener listener)
             throws InterruptedException, IOException {
         try {
-            listener.getLogger().println("Access Token Input: " + getInputValue(this.accessToken, "Access Token", env));
-            listener.getLogger().println("profileID Input: " + getInputValue(this.profileID, "Profile ID", env));
-            listener.getLogger().println("appPath Input: " + this.appPath);
-            listener.getLogger().println("message Input: " + this.message);
-            listener.getLogger().println("AC_PAT: " + env.get("AC_PAT"));
+//            listener.getLogger().println("Access Token Input: " + getInputValue(this.accessToken, "Access Token", env));
+//            listener.getLogger().println("entProfileId Input: " + getInputValue(this.entProfileId, "Profile ID", env));
+//            listener.getLogger().println("ReleaseNote: " + getInputValue(this.releaseNote, "Release Note", env));
+//            listener.getLogger().println("appPath Input: " + this.appPath);
+//            listener.getLogger().println("message Input: " + this.summary);
+//            listener.getLogger().println("AC_PAT: " + env.get("AC_PAT"));
+//            listener.getLogger().println("PUBLISH TYPE: " + publishType);
 
-            listener.getLogger().println("Appcircle CLI Installed");
             loginToAC(launcher, env, listener, workspace);
-            uploadArtifact(launcher, env, listener, workspace);
+            uploadForProfile(launcher, env, listener, workspace);
+            String appID = getStoreVersionList(env, listener);
+            uploadToStore(appID, launcher, env, listener, workspace);
 
         } catch (Exception e) {
             listener.getLogger().println("Failed to run command and parse JSON: " + e.getMessage());
@@ -148,7 +220,7 @@ public class AppcircleBuilder extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
-        public FormValidation doCheckProfileID(@QueryParameter String value) throws IOException, ServletException {
+        public FormValidation doCheckProfileId(@QueryParameter String value) throws IOException, ServletException {
             if (value.isEmpty()) return FormValidation.error("Profile ID cannot be empty");
             return FormValidation.ok();
         }
