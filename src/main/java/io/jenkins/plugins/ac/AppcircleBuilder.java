@@ -1,5 +1,7 @@
 package io.jenkins.plugins.ac;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import hudson.EnvVars;
@@ -13,10 +15,10 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.ArgumentListBuilder;
 import hudson.util.FormValidation;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
@@ -24,9 +26,6 @@ import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AppcircleBuilder extends Builder implements SimpleBuildStep {
 
@@ -38,7 +37,13 @@ public class AppcircleBuilder extends Builder implements SimpleBuildStep {
     private final String publishType;
 
     @DataBoundConstructor
-    public AppcircleBuilder(String accessToken, String appPath, String entProfileId, String releaseNote, String summary, String publishType) {
+    public AppcircleBuilder(
+            String accessToken,
+            String appPath,
+            String entProfileId,
+            String releaseNote,
+            String summary,
+            String publishType) {
         this.accessToken = accessToken;
         this.appPath = appPath;
         this.entProfileId = entProfileId;
@@ -59,7 +64,12 @@ public class AppcircleBuilder extends Builder implements SimpleBuildStep {
         args.add("--pat");
         args.add(getInputValue(this.accessToken, "Access Token", env));
 
-        int exitCode = launcher.launch().cmds(args).envs(env).stdout(listener).pwd(workspace).join();
+        int exitCode = launcher.launch()
+                .cmds(args)
+                .envs(env)
+                .stdout(listener)
+                .pwd(workspace)
+                .join();
 
         if (exitCode != 0) {
             throw new IOException("Failed to log in to Appcircle. Exit code: " + exitCode);
@@ -83,14 +93,20 @@ public class AppcircleBuilder extends Builder implements SimpleBuildStep {
         args.add("--app");
         args.add(getInputValue(this.appPath, "Build Path", env));
 
-        int exitCode = launcher.launch().cmds(args).envs(env).stdout(listener).pwd(workspace).join();
+        int exitCode = launcher.launch()
+                .cmds(args)
+                .envs(env)
+                .stdout(listener)
+                .pwd(workspace)
+                .join();
 
         if (exitCode != 0) {
             throw new IOException("Failed to upload app to Appcircle Enterprise store. Exit code: " + exitCode);
         }
     }
 
-    String getStoreVersionList(@NonNull EnvVars env, @NonNull TaskListener listener) throws IOException, InterruptedException {
+    String getStoreVersionList(@NonNull EnvVars env, @NonNull TaskListener listener)
+            throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder();
         args.add("appcircle");
         args.add("enterprise-app-store");
@@ -108,7 +124,8 @@ public class AppcircleBuilder extends Builder implements SimpleBuildStep {
 
             // Read the output
             StringBuilder output = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            try (BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     output.append(line);
@@ -120,7 +137,7 @@ public class AppcircleBuilder extends Builder implements SimpleBuildStep {
             // Parse the JSON output
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode list = objectMapper.readTree(output.toString());
-            @Nullable  String appVersionId = list.get(0).get("id").asText();
+            @Nullable String appVersionId = list.get(0).get("id").asText();
             if (appVersionId != null) {
                 return appVersionId;
             }
@@ -136,9 +153,10 @@ public class AppcircleBuilder extends Builder implements SimpleBuildStep {
             @NonNull Launcher launcher,
             @NonNull EnvVars env,
             @NonNull TaskListener listener,
-            @NonNull FilePath workspace
-    )  throws IOException, InterruptedException {
-        // `appcircle enterprise-app-store version publish --entProfileId ${entProfileId} --entVersionId ${entVersionId} --summary "${summary}" --releaseNotes "${releaseNote}" --publishType ${publishType}`;
+            @NonNull FilePath workspace)
+            throws IOException, InterruptedException {
+        // `appcircle enterprise-app-store version publish --entProfileId ${entProfileId} --entVersionId ${entVersionId}
+        // --summary "${summary}" --releaseNotes "${releaseNote}" --publishType ${publishType}`;
         ArgumentListBuilder args = new ArgumentListBuilder();
         args.add("appcircle");
         args.add("enterprise-app-store");
@@ -155,7 +173,12 @@ public class AppcircleBuilder extends Builder implements SimpleBuildStep {
         args.add("--publishType");
         args.add(getInputValue(this.publishType, "Publish Type", env));
 
-        int exitCode = launcher.launch().cmds(args).envs(env).stdout(listener).pwd(workspace).join();
+        int exitCode = launcher.launch()
+                .cmds(args)
+                .envs(env)
+                .stdout(listener)
+                .pwd(workspace)
+                .join();
 
         if (exitCode != 0) {
             throw new IOException("Failed to upload app to Appcircle Enterprise store. Exit code: " + exitCode);
@@ -171,17 +194,21 @@ public class AppcircleBuilder extends Builder implements SimpleBuildStep {
             @NonNull TaskListener listener)
             throws InterruptedException, IOException {
         try {
-//            listener.getLogger().println("Access Token Input: " + getInputValue(this.accessToken, "Access Token", env));
-//            listener.getLogger().println("entProfileId Input: " + getInputValue(this.entProfileId, "Profile ID", env));
-//            listener.getLogger().println("ReleaseNote: " + getInputValue(this.releaseNote, "Release Note", env));
-//            listener.getLogger().println("appPath Input: " + this.appPath);
-//            listener.getLogger().println("message Input: " + this.summary);
-//            listener.getLogger().println("AC_PAT: " + env.get("AC_PAT"));
-//            listener.getLogger().println("PUBLISH TYPE: " + publishType);
+            //            listener.getLogger().println("Access Token Input: " + getInputValue(this.accessToken, "Access
+            // Token", env));
+            //            listener.getLogger().println("entProfileId Input: " + getInputValue(this.entProfileId,
+            // "Profile ID", env));
+            //            listener.getLogger().println("ReleaseNote: " + getInputValue(this.releaseNote, "Release Note",
+            // env));
+            //            listener.getLogger().println("appPath Input: " + this.appPath);
+            //            listener.getLogger().println("message Input: " + this.summary);
+            //            listener.getLogger().println("AC_PAT: " + env.get("AC_PAT"));
+            //            listener.getLogger().println("PUBLISH TYPE: " + publishType);
 
             loginToAC(launcher, env, listener, workspace);
             uploadForProfile(launcher, env, listener, workspace);
             String appID = getStoreVersionList(env, listener);
+            listener.getLogger().println("APP_ID: " + appID);
             uploadToStore(appID, launcher, env, listener, workspace);
 
         } catch (Exception e) {
@@ -190,7 +217,8 @@ public class AppcircleBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-    String getInputValue(@Nullable String inputValue, String inputFieldName, EnvVars envVars) throws IOException, InterruptedException {
+    String getInputValue(@Nullable String inputValue, String inputFieldName, EnvVars envVars)
+            throws IOException, InterruptedException {
         if (inputValue == null) {
             throw new IOException(inputFieldName + " is empty. Please fulfill the input");
         }
