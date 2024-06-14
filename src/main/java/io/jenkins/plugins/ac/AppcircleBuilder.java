@@ -15,6 +15,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.ArgumentListBuilder;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,14 +23,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
+import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.verb.POST;
 
 public class AppcircleBuilder extends Builder implements SimpleBuildStep {
 
-    private final String accessToken;
+    private final Secret accessToken;
     private final String entProfileId;
     private final String appPath;
     private final String summary;
@@ -38,7 +41,7 @@ public class AppcircleBuilder extends Builder implements SimpleBuildStep {
 
     @DataBoundConstructor
     public AppcircleBuilder(
-            String accessToken,
+            Secret accessToken,
             String appPath,
             String entProfileId,
             String releaseNote,
@@ -62,7 +65,7 @@ public class AppcircleBuilder extends Builder implements SimpleBuildStep {
         args.add("appcircle");
         args.add("login");
         args.add("--pat");
-        args.add(getInputValue(this.accessToken, "Access Token", env));
+        args.add(getInputValue(this.accessToken.getPlainText(), "Access Token", env));
 
         int exitCode = launcher.launch()
                 .cmds(args)
@@ -238,22 +241,34 @@ public class AppcircleBuilder extends Builder implements SimpleBuildStep {
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
+        @POST
         public FormValidation doCheckAccessToken(@QueryParameter String value) throws IOException, ServletException {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+
             if (value.isEmpty()) return FormValidation.error("Access Token cannot be empty");
             return FormValidation.ok();
         }
 
+        @POST
         public FormValidation doCheckAppPath(@QueryParameter String value) throws IOException, ServletException {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+
             if (value.isEmpty()) return FormValidation.error("App Path cannot be empty");
             return FormValidation.ok();
         }
 
+        @POST
         public FormValidation doCheckProfileId(@QueryParameter String value) throws IOException, ServletException {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+
             if (value.isEmpty()) return FormValidation.error("Profile ID cannot be empty");
             return FormValidation.ok();
         }
 
+        @POST
         public FormValidation doCheckMessage(@QueryParameter String value) throws IOException, ServletException {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+
             if (value.isEmpty()) return FormValidation.error("Message cannot be empty");
             return FormValidation.ok();
         }
