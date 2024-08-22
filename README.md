@@ -31,26 +31,26 @@ These features make the Appcircle Enterprise Mobile App Store a powerful tool fo
 
 After uploading your build successfully, you will see your app in the "Enterprise App Store" module like below
 
-![Enterprise App Store Dashboard](./src/main/resources/assets/ent_app_store.png)
+![Enterprise App Store Dashboard](docs/assets/ent_app_store.png)
 
 ### Install Appcircle Enterprise Store Plugin
 
 Go to your Jenkins dashboard and follow, Manage Jenkins > Plugins and search for "Appcircle Enterprise Store"
 
-![Installation Steps](./src/main/resources/assets/installation_steps.png)
+![Installation Steps](docs/assets/installation_steps.png)
 
 ### Add Plugin in Build Steps
 
 Go to your configuration page of the project add a build step.
 
-![Build Step](./src/main/resources/assets/add_pannel.png)
+![Build Step](docs/assets/add_pannel.png)
 
 ### Configure Plugin
 
 After adding the plugin into your build steps make sure you fulfill required inputs.
 Also, do not forget to add the plugin after your build steps. Because you will be asked to provide the build path.
 
-![Build Step](./src/main/resources/assets/configure_pannel.png)
+![Build Step](docs/assets/configure_pannel.png)
 
 
 ### Generating/Managing the Personal API Tokens
@@ -61,13 +61,24 @@ To generate a Personal API Token, follow these steps:
 2. You'll find the Personal API Token section in the top right corner.
 3. Press the "Generate Token" button to generate your first token.
 
-![Token Generation](./src/main/resources/assets/PAT.png)
+![Token Generation](docs/assets/PAT.png)
 
-### Leveraging Environment Variables
+### Using Plugin into Your Script
 
-Utilize environment variables seamlessly by substituting the parameters with `$(VARIABLE_NAME)` in your task inputs. The extension automatically retrieves values from the specified environment variables within your pipeline.
-
-Efficiently distribute test binaries or beta versions using Appcircle, featuring seamless IPA and APK distribution capabilities. Streamline your testing process with our versatile tool designed to optimize your distribution workflow. If you need support or more information, please [contact us](https://appcircle.io/contact)
+```Groovy
+   stage('Publish') {
+      environment {
+         AC_PAT = credentials('AC_PAT')
+      }
+       steps {
+          appcircleEnterpriseAppStore personalAPIToken: AC_PAT,
+                  appPath: '$APP_PATH',
+                  releaseNote: '$RELEASE_NOTE',
+                  summary: '$SUMMARY',
+                  publishType: '$PUBLISH_TYPE' // "0": None, "1": Beta, "2": Live
+       }
+   }
+```
 
 ### Reference
 
