@@ -1,7 +1,5 @@
 package io.jenkins.plugins.appcircle.enterprise.app.store;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
-import hudson.model.TaskListener;
 import io.jenkins.plugins.appcircle.enterprise.app.store.Models.UserResponse;
 import java.io.IOException;
 import java.net.URI;
@@ -18,8 +16,7 @@ import org.json.JSONObject;
 
 public class AuthService {
 
-    public static UserResponse getAcToken(String pat, @NonNull TaskListener listener)
-            throws IOException, URISyntaxException {
+    public static UserResponse getAcToken(String pat) throws IOException, URISyntaxException {
         String endpointUrl = "https://auth.appcircle.io/auth/v2/token";
         URI uri = new URI(endpointUrl);
 

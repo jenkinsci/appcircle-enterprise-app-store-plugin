@@ -6,6 +6,7 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
@@ -15,6 +16,7 @@ import hudson.util.Secret;
 import io.jenkins.plugins.appcircle.enterprise.app.store.Models.UserResponse;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
 import org.json.JSONObject;
@@ -49,11 +51,16 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
             @NonNull TaskListener listener)
             throws InterruptedException, IOException {
         try {
-            UserResponse response = AuthService.getAcToken(this.personalAPIToken.getPlainText(), listener);
+            if (!validateFileExtension(this.appPath)) {
+                throw new IOException(
+                        "Invalid file extension: " + this.appPath + ". For Android, use .apk. For iOS, use .ipa.");
+            }
+
+            UserResponse response = AuthService.getAcToken(this.personalAPIToken.getPlainText());
             listener.getLogger().println("Login is successful.");
-            UploadService uploadService = new UploadService(response.getAccessToken(), listener);
+            UploadService uploadService = new UploadService(response.getAccessToken());
             JSONObject uploadResponse = uploadService.uploadArtifact(this.appPath);
-            Boolean result = uploadService.checkUploadStatus(uploadResponse.optString("taskId"), listener);
+            Boolean result = uploadService.checkUploadStatus(uploadResponse.optString("taskId"));
 
             if (result) {
                 listener.getLogger().println("✔ App uploaded successfully.");
@@ -74,9 +81,21 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
         } catch (URISyntaxException e) {
             listener.error("Invalid URI: " + e.getMessage());
         } catch (Exception e) {
-            listener.getLogger().println("Failed to run command and parse JSON: " + e.getMessage());
-            throw e;
+            listener.getLogger().println(e.getMessage());
+            run.setResult(Result.FAILURE);
         }
+    }
+
+    Boolean validateFileExtension(String filePath) {
+        String[] validExtensions = {".apk", ".ipa"};
+        int lastIndex = filePath.lastIndexOf('.');
+        String fileExtension = filePath.substring(lastIndex);
+
+        if (!Arrays.asList(validExtensions).contains(fileExtension)) {
+            return false;
+        }
+
+        return true;
     }
 
     @Symbol("appcircleEnterpriseAppStore")
@@ -91,7 +110,18 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
 
         @POST
         public FormValidation doCheckAppPath(@QueryParameter String value) {
-            if (value.isEmpty()) return FormValidation.error("App Path cannot be empty");
+            String[] validExtensions = {".apk", ".ipa"};
+            int lastIndex = value.lastIndexOf('.');
+            String fileExtension = value.substring(lastIndex);
+
+            if (lastIndex == -1) {
+                return FormValidation.error("File has no extension.");
+            } else if (value.isEmpty()) {
+                return FormValidation.error("App Path cannot be empty");
+            } else if (!Arrays.asList(validExtensions).contains(fileExtension)) {
+                return FormValidation.error(
+                        "Invalid file extension: " + fileExtension + ". For Android, use .apk. For iOS, use .ipa.");
+            }
             return FormValidation.ok();
         }
 

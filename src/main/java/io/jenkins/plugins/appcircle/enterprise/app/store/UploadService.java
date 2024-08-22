@@ -1,8 +1,6 @@
 package io.jenkins.plugins.appcircle.enterprise.app.store;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
-import hudson.model.TaskListener;
 import io.jenkins.plugins.appcircle.enterprise.app.store.Models.AppVersions;
 import io.jenkins.plugins.appcircle.enterprise.app.store.Models.EnterpriseProfile;
 import java.io.File;
@@ -31,12 +29,10 @@ public class UploadService {
     private static final String BASE_URL = "https://api.appcircle.io";
 
     String authToken;
-    TaskListener listener;
 
     @DataBoundConstructor
-    public UploadService(String authToken, TaskListener listener) {
+    public UploadService(String authToken) {
         this.authToken = authToken;
-        this.listener = listener;
     }
 
     public JSONObject uploadArtifact(String appPath) throws IOException {
@@ -73,8 +69,6 @@ public class UploadService {
                 "%s/store/v2/profiles/%s/app-versions/%s?action=publish", BASE_URL, entProfileId, entVersionId);
         CloseableHttpClient httpClient = HttpClients.createDefault();
 
-        listener.getLogger().println("URL: " + url);
-
         HttpPatch httpPatch = new HttpPatch(url);
         httpPatch.setHeader("Authorization", "Bearer " + this.authToken);
         httpPatch.setHeader("Content-Type", "application/json");
@@ -109,8 +103,6 @@ public class UploadService {
             String responseBody = EntityUtils.toString(response.getEntity());
             JSONArray profilesArray = new JSONArray(responseBody);
 
-            listener.getLogger().println("App Versions:" + profilesArray.toString());
-
             AppVersions[] appVersions = new AppVersions[profilesArray.length()];
             for (int i = 0; i < profilesArray.length(); i++) {
                 JSONObject profileObject = profilesArray.getJSONObject(i);
@@ -138,7 +130,7 @@ public class UploadService {
         }
     }
 
-    Boolean checkUploadStatus(String taskId, @NonNull TaskListener listener) {
+    Boolean checkUploadStatus(String taskId) throws Exception {
         String url = String.format("%s/task/v1/tasks/%s", BASE_URL, taskId);
         String result = "";
 
@@ -157,21 +149,18 @@ public class UploadService {
                 @Nullable String stateName = jsonResponse.optString("stateName");
 
                 if (stateName == null) {
-                    listener.getLogger().println("Upload Status Could Not Received");
-                    return false;
+                    throw new Exception("Upload Status Could Not Received");
                 } else if (stateValue == 2) {
-                    listener.getLogger().println(taskId + " id upload request failed with status " + stateName);
-                    return false;
+                    throw new Exception(taskId + " id upload request failed with status " + stateName);
                 } else if (stateValue == 1) {
                     Thread.sleep(2000);
-                    return checkUploadStatus(taskId, listener);
+                    return checkUploadStatus(taskId);
                 } else if (stateValue == 3) {
                     return true;
                 }
             }
         } catch (Exception e) {
-            System.err.println("IO Exception occurred while executing request: " + e.getMessage());
-            e.printStackTrace();
+            throw e;
         }
 
         return true;
@@ -188,8 +177,6 @@ public class UploadService {
             String responseBody = EntityUtils.toString(response.getEntity());
 
             JSONArray profilesArray = new JSONArray(responseBody);
-
-            listener.getLogger().println("Ent Profiles: " + profilesArray.toString());
 
             EnterpriseProfile[] appVersions = new EnterpriseProfile[profilesArray.length()];
             for (int i = 0; i < profilesArray.length(); i++) {
@@ -224,7 +211,6 @@ public class UploadService {
     }
 
     public String getLatestAppVersionId(String profileId) throws IOException {
-        listener.getLogger().println("App Vers. Profile Id: " + profileId);
         AppVersions[] versions = getAppVersions(profileId);
 
         Arrays.sort(versions, new Comparator<AppVersions>() {
@@ -233,8 +219,6 @@ public class UploadService {
                 return o2.getUpdateDate().compareTo(o1.getUpdateDate());
             }
         });
-
-        listener.getLogger().println("Versions:" + versions[0]);
 
         return versions[0].getId();
     }
