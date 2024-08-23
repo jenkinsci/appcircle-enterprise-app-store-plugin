@@ -16,7 +16,6 @@ import hudson.util.Secret;
 import io.jenkins.plugins.appcircle.enterprise.app.store.Models.UserResponse;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
 import org.json.JSONObject;
@@ -77,7 +76,6 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
                     }
                 }
             }
-
         } catch (URISyntaxException e) {
             listener.error("Invalid URI: " + e.getMessage());
         } catch (Exception e) {
@@ -87,11 +85,7 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
     }
 
     Boolean validateFileExtension(String filePath) {
-        String[] validExtensions = {".apk", ".ipa"};
-        int lastIndex = filePath.lastIndexOf('.');
-        String fileExtension = filePath.substring(lastIndex);
-
-        if (!Arrays.asList(validExtensions).contains(fileExtension)) {
+        if (!filePath.matches(".*\\.(apk|ipa)$")) {
             return false;
         }
 
@@ -110,30 +104,28 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
 
         @POST
         public FormValidation doCheckAppPath(@QueryParameter String value) {
-            String[] validExtensions = {".apk", ".ipa"};
-            int lastIndex = value.lastIndexOf('.');
-            String fileExtension = value.substring(lastIndex);
-
-            if (lastIndex == -1) {
-                return FormValidation.error("File has no extension.");
-            } else if (value.isEmpty()) {
-                return FormValidation.error("App Path cannot be empty");
-            } else if (!Arrays.asList(validExtensions).contains(fileExtension)) {
-                return FormValidation.error(
-                        "Invalid file extension: " + fileExtension + ". For Android, use .apk. For iOS, use .ipa.");
+            if (value.isEmpty()) return FormValidation.error("App Path cannot be empty");
+            if (!value.matches(".*\\.(apk|ipa)$")) {
+                return FormValidation.error("Invalid file extension: For Android, use .apk. For iOS, use .ipa.");
             }
             return FormValidation.ok();
         }
 
         @POST
-        public FormValidation doCheckProfileId(@QueryParameter String value) {
-            if (value.isEmpty()) return FormValidation.error("Profile ID cannot be empty");
+        public FormValidation doCheckSummary(@QueryParameter String value) {
+            if (value.isEmpty()) return FormValidation.error("Summary cannot be empty");
             return FormValidation.ok();
         }
 
         @POST
-        public FormValidation doCheckMessage(@QueryParameter String value) {
-            if (value.isEmpty()) return FormValidation.error("Message cannot be empty");
+        public FormValidation doCheckReleaseNote(@QueryParameter String value) {
+            if (value.isEmpty()) return FormValidation.error("Release Note cannot be empty");
+            return FormValidation.ok();
+        }
+
+        @POST
+        public FormValidation doCheckPublishType(@QueryParameter String value) {
+            if (value.isEmpty()) return FormValidation.error("Publish Type cannot be empty");
             return FormValidation.ok();
         }
 
