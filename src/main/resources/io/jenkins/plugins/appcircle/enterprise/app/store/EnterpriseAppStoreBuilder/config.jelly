@@ -9,7 +9,7 @@
     <f:entry title="${%Summary}" field="summary">
         <f:textbox />
     </f:entry>
-    <f:entry title="${%Release Note}" field="releaseNote">
+    <f:entry title="${%Release Notes}" field="releaseNotes">
         <f:textbox />
     </f:entry>
     <f:entry title="Choose Publish Type" field="publishType">

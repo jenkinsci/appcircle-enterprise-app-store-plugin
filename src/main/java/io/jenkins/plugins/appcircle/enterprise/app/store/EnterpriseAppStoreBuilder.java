@@ -28,17 +28,37 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
     private final Secret personalAPIToken;
     private final String appPath;
     private final String summary;
-    private final String releaseNote;
+    private final String releaseNotes;
     private final String publishType;
 
     @DataBoundConstructor
     public EnterpriseAppStoreBuilder(
-            String personalAPIToken, String appPath, String releaseNote, String summary, String publishType) {
+            String personalAPIToken, String appPath, String releaseNotes, String summary, String publishType) {
         this.personalAPIToken = Secret.fromString(personalAPIToken);
         this.appPath = appPath;
         this.summary = summary;
-        this.releaseNote = releaseNote;
+        this.releaseNotes = releaseNotes;
         this.publishType = publishType;
+    }
+
+    public String getPersonalAPIToken() {
+        return personalAPIToken.getPlainText();
+    }
+
+    public String getAppPath() {
+        return appPath;
+    }
+
+    public String getReleaseNotes() {
+        return releaseNotes;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public String getPublishType() {
+        return publishType;
     }
 
     @Override
@@ -68,7 +88,7 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
                     String profileId = uploadService.getProfileId();
                     String appVersionId = uploadService.getLatestAppVersionId(profileId);
                     Boolean isPublished = uploadService.publishEnterpriseAppVersion(
-                            profileId, appVersionId, this.summary, this.releaseNote, this.publishType);
+                            profileId, appVersionId, this.summary, this.releaseNotes, this.publishType);
                     if (isPublished) {
                         listener.getLogger().println("App is published.");
                     } else {
@@ -118,8 +138,8 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
         }
 
         @POST
-        public FormValidation doCheckReleaseNote(@QueryParameter String value) {
-            if (value.isEmpty()) return FormValidation.error("Release Note cannot be empty");
+        public FormValidation doCheckReleaseNotes(@QueryParameter String value) {
+            if (value.isEmpty()) return FormValidation.error("Release Notes cannot be empty");
             return FormValidation.ok();
         }
 
