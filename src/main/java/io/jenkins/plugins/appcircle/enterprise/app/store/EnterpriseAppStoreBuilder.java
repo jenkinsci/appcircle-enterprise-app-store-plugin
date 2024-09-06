@@ -82,7 +82,8 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
             Boolean result = uploadService.checkUploadStatus(uploadResponse.optString("taskId"));
 
             if (result) {
-                listener.getLogger().println(this.appPath + " uploaded to the Appcircle Enterprise Store successfully.");
+                listener.getLogger()
+                        .println(this.appPath + " uploaded to the Appcircle Enterprise Store successfully.");
                 if (!this.publishType.equals("0")) {
                     listener.getLogger().println("App is publishing.");
                     String profileId = uploadService.getProfileId();
