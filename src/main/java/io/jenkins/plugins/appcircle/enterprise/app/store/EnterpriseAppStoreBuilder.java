@@ -157,7 +157,7 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
         @NonNull
         @Override
         public String getDisplayName() {
-            return Messages.HelloWorldBuilder_DescriptorImpl_DisplayName();
+            return Messages.AppcircleEnterpriseStore_DescriptorImpl_DisplayName();
         }
     }
 }
