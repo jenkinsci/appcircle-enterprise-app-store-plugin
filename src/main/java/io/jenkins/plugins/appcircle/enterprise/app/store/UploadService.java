@@ -22,6 +22,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -55,8 +56,20 @@ public class UploadService {
         uploadFile.setEntity(entity);
 
         try (CloseableHttpResponse response = httpClient.execute(uploadFile)) {
+            int statusCode = response.getStatusLine().getStatusCode();
             String responseBody = EntityUtils.toString(response.getEntity());
-            return new JSONObject(responseBody);
+
+            if (statusCode == 200) {
+                try {
+                    return new JSONObject(responseBody);
+                } catch (JSONException e) {
+                    throw new JSONException("Invalid JSON response: " + responseBody);
+                }
+            } else {
+                throw new IOException("HTTP error " + statusCode + ": " + responseBody);
+            }
+        } catch (JSONException e) {
+            throw new JSONException("Invalid JSON response: " + e);
         } catch (IOException e) {
             throw e;
         }

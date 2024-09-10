@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -97,6 +98,8 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
                     }
                 }
             }
+        } catch (JSONException e) {
+            listener.getLogger().println(e.getMessage());
         } catch (URISyntaxException e) {
             listener.error("Invalid URI: " + e.getMessage());
         } catch (Exception e) {
