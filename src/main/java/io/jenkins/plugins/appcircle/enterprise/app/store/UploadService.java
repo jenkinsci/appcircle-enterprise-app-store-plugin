@@ -59,7 +59,7 @@ public class UploadService {
             int statusCode = response.getStatusLine().getStatusCode();
             String responseBody = EntityUtils.toString(response.getEntity());
 
-            if (statusCode == 200) {
+            if (statusCode <= 200 || statusCode <= 299) {
                 try {
                     return new JSONObject(responseBody);
                 } catch (JSONException e) {
