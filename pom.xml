@@ -10,12 +10,12 @@
   </parent>
 
   <groupId>io.jenkins.plugins</groupId>
-  <artifactId>appcircle-enterprise-store</artifactId>
+  <artifactId>appcircle-enterprise-app-store</artifactId>
   <version>1.0</version>
   <packaging>hpi</packaging>
 
   <name>Appcircle Enterprise Store</name>
-  <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
+  <url>https://github.com/jenkinsci/${project.artifactId}-plugin#readme</url>
   <licenses>
     <license>
       <name>MIT License</name>
