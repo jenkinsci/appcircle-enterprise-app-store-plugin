@@ -5,13 +5,13 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.86</version>
+    <version>4.85</version>
     <relativePath />
   </parent>
 
   <groupId>io.jenkins.plugins</groupId>
   <artifactId>appcircle-enterprise-app-store</artifactId>
-  <version>1.0</version>
+  <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
 
   <name>Appcircle Enterprise App Store</name>
@@ -46,7 +46,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.440.x</artifactId>
-        <version>2907.vcb_35d6f2f7de</version>
+        <version>2928.ved44ea_84e034</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
