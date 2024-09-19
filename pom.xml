@@ -10,7 +10,7 @@
   </parent>
 
   <groupId>io.jenkins.plugins</groupId>
-  <artifactId>appcircle-enterprise-app-store</artifactId>
+  <artifactId>appcircle-enterprise-store</artifactId>
   <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
 
