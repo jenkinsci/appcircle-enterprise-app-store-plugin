@@ -14,7 +14,7 @@
   <version>1.0</version>
   <packaging>hpi</packaging>
 
-  <name>Appcircle Enterprise Store</name>
+  <name>Appcircle Enterprise App Store</name>
   <url>https://github.com/jenkinsci/${project.artifactId}-plugin#readme</url>
   <licenses>
     <license>
