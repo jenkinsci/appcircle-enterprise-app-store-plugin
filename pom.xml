@@ -15,7 +15,8 @@
   <packaging>hpi</packaging>
 
   <name>Appcircle Enterprise App Store</name>
-  <url>https://github.com/jenkinsci/${project.artifactId}-plugin#readme</url>
+  <url>https://github.com/appcircleio/appcircle-enterprise-app-store-plugin/blob/master/README.md</url>
+  <description>Appcircle Enterprise App Store Plugin for Jenkins</description>
   <licenses>
     <license>
       <name>MIT License</name>
