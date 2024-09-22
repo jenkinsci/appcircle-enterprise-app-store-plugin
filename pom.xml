@@ -16,7 +16,7 @@
 
   <name>Appcircle Enterprise App Store</name>
   <description>Appcircle Enterprise App Store Plugin for Jenkins</description>
-  <url>https://github.com/appcircleio/appcircle-enterprise-app-store-plugin/blob/master/README.md</url>
+  <url>https://github.com/jenkinsci/appcircle-enterprise-app-store-plugin/blob/master/README.md</url>
   <licenses>
     <license>
       <name>MIT License</name>
