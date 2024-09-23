@@ -1,6 +1,4 @@
-## Appcircle Enterprise App Store
-
-Appcircle Enterprise Mobile App Store is your own mobile app store for providing access to in-house apps with a customizable mobile storefront.
+The Enterprise Mobile App Store is your customizable internal mobile app store, enabling seamless enterprise distribution of Android APK/AAB and iOS IPA files.
 
 - **Customizable Storefront:** Distribute your in-house apps with a fully customizable mobile storefront.
 - **Secure Distribution:** Everything you need for secure, streamlined distribution of your in-house apps.
@@ -51,7 +49,6 @@ After adding the plugin into your build steps make sure you fulfill required inp
 Also, do not forget to add the plugin after your build steps. Because you will be asked to provide the build path.
 
 ![Build Step](docs/assets/configure_pannel.png)
-
 
 ### Generating/Managing the Personal API Tokens
 
