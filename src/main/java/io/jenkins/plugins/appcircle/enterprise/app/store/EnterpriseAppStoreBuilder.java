@@ -72,8 +72,8 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
             throws InterruptedException, IOException {
         try {
             if (!validateFileExtension(this.appPath)) {
-                throw new IOException(
-                        "Invalid file extension: " + this.appPath + ". For Android, use .apk. For iOS, use .ipa.");
+                throw new IOException("Invalid file extension: " + this.appPath
+                        + ". For Android, use .apk or .aab. For iOS, use .ipa.");
             }
 
             UserResponse response = AuthService.getAcToken(this.personalAPIToken.getPlainText());
@@ -109,7 +109,7 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
     }
 
     Boolean validateFileExtension(String filePath) {
-        if (!filePath.matches(".*\\.(apk|ipa)$")) {
+        if (!filePath.matches(".*\\.(apk|aab|ipa)$")) {
             return false;
         }
 
@@ -129,8 +129,9 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
         @POST
         public FormValidation doCheckAppPath(@QueryParameter String value) {
             if (value.isEmpty()) return FormValidation.error("App Path cannot be empty");
-            if (!value.matches(".*\\.(apk|ipa)$")) {
-                return FormValidation.error("Invalid file extension: For Android, use .apk. For iOS, use .ipa.");
+            if (!value.matches(".*\\.(apk|aab|ipa)$")) {
+                return FormValidation.error(
+                        "Invalid file extension: For Android, use .apk or .aab. For iOS, use .ipa.");
             }
             return FormValidation.ok();
         }
