@@ -19,4 +19,12 @@
             <option value="2">Live</option>
         </select>
     </f:entry>
+    <f:advanced title="Self-Hosted Appcircle">
+        <f:entry title="Auth Endpoint" field="authEndpoint">
+            <f:textbox value="${instance.authEndpoint}"/>
+        </f:entry>
+        <f:entry title="API Endpoint" field="apiEndpoint">
+            <f:textbox value="${instance.apiEndpoint}"/>
+        </f:entry>
+    </f:advanced>
 </j:jelly>

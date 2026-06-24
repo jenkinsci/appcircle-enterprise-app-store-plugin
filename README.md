@@ -77,6 +77,28 @@ To generate a Personal API Token, follow these steps:
    }
 ```
 
+### Self-Hosted Appcircle
+
+If you run a self-hosted Appcircle installation, point the plugin to your own servers with the optional
+`authEndpoint` and `apiEndpoint` parameters. When omitted, the plugin uses the Appcircle cloud defaults
+(`https://auth.appcircle.io` and `https://api.appcircle.io`), so existing cloud configurations keep working
+without any change.
+
+```Groovy
+   appcircleEnterpriseAppStore personalAPIToken: AC_PAT,
+           appPath: '$APP_PATH',
+           releaseNotes: '$RELEASE_NOTES',
+           summary: '$SUMMARY',
+           publishType: '$PUBLISH_TYPE',
+           authEndpoint: 'https://auth.your-appcircle-domain.com',
+           apiEndpoint: 'https://api.your-appcircle-domain.com'
+```
+
+- `authEndpoint`: Base URL of the self-hosted Appcircle authentication server. Optional; defaults to `https://auth.appcircle.io`.
+- `apiEndpoint`: Base URL of the self-hosted Appcircle API server. Optional; defaults to `https://api.appcircle.io`.
+
+> **Self-signed or private CA certificates:** If your self-hosted Appcircle server presents a self-signed certificate (or one issued by a private/internal CA), the plugin's HTTPS requests will fail certificate validation. The plugin does not disable TLS verification. To use it, add the server's CA certificate to the trust store of the JVM running Jenkins — for example import it into the JDK `cacerts` with `keytool`, or start Jenkins with `-Djavax.net.ssl.trustStore=/path/to/truststore`.
+
 ### Reference
 
 - For details on generating an Appcircle Personal Access Token, visit [Generating/Managing Personal API Tokens](https://docs.appcircle.io/appcircle-api/api-authentication#generatingmanaging-the-personal-api-tokens)

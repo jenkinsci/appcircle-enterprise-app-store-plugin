@@ -16,8 +16,13 @@ import org.json.JSONObject;
 
 public class AuthService {
 
-    public static UserResponse getAcToken(String pat) throws IOException, URISyntaxException {
-        String endpointUrl = "https://auth.appcircle.io/auth/v2/token";
+    public static final String DEFAULT_AUTH_ENDPOINT = "https://auth.appcircle.io";
+
+    public static UserResponse getAcToken(String pat, String authEndpoint) throws IOException, URISyntaxException {
+        String baseUrl = (authEndpoint == null || authEndpoint.trim().isEmpty())
+                ? DEFAULT_AUTH_ENDPOINT
+                : authEndpoint.trim().replaceAll("/+$", "");
+        String endpointUrl = baseUrl + "/auth/v2/token";
         URI uri = new URI(endpointUrl);
 
         HttpClient httpClient = HttpClients.createDefault();
