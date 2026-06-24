@@ -21,6 +21,7 @@ import org.jenkinsci.Symbol;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 
@@ -31,6 +32,8 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
     private final String summary;
     private final String releaseNotes;
     private final String publishType;
+    private String authEndpoint;
+    private String apiEndpoint;
 
     @DataBoundConstructor
     public EnterpriseAppStoreBuilder(
@@ -44,6 +47,24 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
 
     public String getPersonalAPIToken() {
         return personalAPIToken.getPlainText();
+    }
+
+    public String getAuthEndpoint() {
+        return authEndpoint;
+    }
+
+    @DataBoundSetter
+    public void setAuthEndpoint(String authEndpoint) {
+        this.authEndpoint = authEndpoint;
+    }
+
+    public String getApiEndpoint() {
+        return apiEndpoint;
+    }
+
+    @DataBoundSetter
+    public void setApiEndpoint(String apiEndpoint) {
+        this.apiEndpoint = apiEndpoint;
     }
 
     public String getAppPath() {
@@ -72,13 +93,13 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
             throws InterruptedException, IOException {
         try {
             if (!validateFileExtension(this.appPath)) {
-                throw new IOException(
-                        "Invalid file extension: " + this.appPath + ". For Android, use .apk. For iOS, use .ipa.");
+                throw new IOException("Invalid file extension: " + this.appPath
+                        + ". For Android, use .apk or .aab. For iOS, use .ipa.");
             }
 
-            UserResponse response = AuthService.getAcToken(this.personalAPIToken.getPlainText());
+            UserResponse response = AuthService.getAcToken(this.personalAPIToken.getPlainText(), this.authEndpoint);
             listener.getLogger().println("Login is successful.");
-            UploadService uploadService = new UploadService(response.getAccessToken());
+            UploadService uploadService = new UploadService(response.getAccessToken(), this.apiEndpoint);
             JSONObject uploadResponse = uploadService.uploadArtifact(this.appPath);
             Boolean result = uploadService.checkUploadStatus(uploadResponse.optString("taskId"));
 
@@ -109,7 +130,7 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
     }
 
     Boolean validateFileExtension(String filePath) {
-        if (!filePath.matches(".*\\.(apk|ipa)$")) {
+        if (!filePath.matches(".*\\.(apk|aab|ipa)$")) {
             return false;
         }
 
@@ -129,8 +150,9 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
         @POST
         public FormValidation doCheckAppPath(@QueryParameter String value) {
             if (value.isEmpty()) return FormValidation.error("App Path cannot be empty");
-            if (!value.matches(".*\\.(apk|ipa)$")) {
-                return FormValidation.error("Invalid file extension: For Android, use .apk. For iOS, use .ipa.");
+            if (!value.matches(".*\\.(apk|aab|ipa)$")) {
+                return FormValidation.error(
+                        "Invalid file extension: For Android, use .apk or .aab. For iOS, use .ipa.");
             }
             return FormValidation.ok();
         }
