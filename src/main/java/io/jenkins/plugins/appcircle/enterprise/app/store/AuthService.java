@@ -11,7 +11,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
@@ -26,7 +25,7 @@ public class AuthService {
         String endpointUrl = baseUrl + "/auth/v2/token";
         URI uri = new URI(endpointUrl);
 
-        HttpClient httpClient = HttpClients.createDefault();
+        HttpClient httpClient = AppcircleHttpClients.createDefault();
         HttpPost httpPost = new HttpPost(uri);
 
         // Set headers
