@@ -3,6 +3,9 @@
     <f:entry title="${%Personal API Token}" field="personalAPIToken">
         <f:password clazz="required" checkMessage="${%Personal API Token cannot be empty}"/>
     </f:entry>
+    <f:entry title="${%Sub-Organization Name}" field="subOrganizationName">
+        <f:textbox/>
+    </f:entry>
     <f:entry title="${%App Path}" field="appPath">
         <f:textbox/>
     </f:entry>
