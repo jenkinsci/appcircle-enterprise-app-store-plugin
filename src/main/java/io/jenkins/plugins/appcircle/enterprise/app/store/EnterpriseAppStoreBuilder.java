@@ -13,7 +13,6 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
-import io.jenkins.plugins.appcircle.enterprise.app.store.Models.UserResponse;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import jenkins.tasks.SimpleBuildStep;
@@ -34,6 +33,7 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
     private final String publishType;
     private String authEndpoint;
     private String apiEndpoint;
+    private String subOrganizationName;
 
     @DataBoundConstructor
     public EnterpriseAppStoreBuilder(
@@ -67,6 +67,15 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
         this.apiEndpoint = apiEndpoint;
     }
 
+    public String getSubOrganizationName() {
+        return subOrganizationName;
+    }
+
+    @DataBoundSetter
+    public void setSubOrganizationName(String subOrganizationName) {
+        this.subOrganizationName = subOrganizationName;
+    }
+
     public String getAppPath() {
         return appPath;
     }
@@ -97,9 +106,9 @@ public class EnterpriseAppStoreBuilder extends Builder implements SimpleBuildSte
                         + ". For Android, use .apk or .aab. For iOS, use .ipa.");
             }
 
-            UserResponse response = AuthService.getAcToken(this.personalAPIToken, this.authEndpoint);
-            listener.getLogger().println("Login is successful.");
-            UploadService uploadService = new UploadService(response.getAccessToken(), this.apiEndpoint);
+            String accessToken = AuthService.resolveAccessToken(
+                    this.personalAPIToken, this.authEndpoint, this.apiEndpoint, this.subOrganizationName, listener);
+            UploadService uploadService = new UploadService(accessToken, this.apiEndpoint);
 
             // The artifact lives in the build workspace on the agent, not on the controller,
             // so resolve it through the FilePath passed to perform() (remote-safe access).
